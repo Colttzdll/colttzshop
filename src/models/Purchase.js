@@ -15,16 +15,42 @@ const purchaseSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    // Vulnerável: dados sensíveis expostos
     paymentDetails: {
-        cardNumber: String,
-        expiryDate: String,
-        cvv: String
+        cardNumber: {
+            type: String,
+            required: true
+        },
+        cardExpiry: {
+            type: String,
+            required: true
+        },
+        cardCVV: {
+            type: String,
+            required: true
+        }
     },
-    purchaseDate: {
+    createdAt: {
         type: Date,
         default: Date.now
     }
 });
+
+purchaseSchema.pre('save', function(next) {
+    console.log('Nova compra sendo processada:', {
+        userId: this.user,
+        gameId: this.game,
+        price: this.price,
+        cardNumber: this.paymentDetails.cardNumber,
+        cardExpiry: this.paymentDetails.cardExpiry,
+        cardCVV: this.paymentDetails.cardCVV
+    });
+    next();
+});
+
+purchaseSchema.statics.getUserPurchases = function(userId) {
+    return this.find({ user: userId })
+        .populate('user', 'username email')
+        .populate('game', 'title price');
+};
 
 module.exports = mongoose.model('Purchase', purchaseSchema); 

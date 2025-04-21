@@ -4,22 +4,34 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        unique: true
+        // Sem validação de tamanho mínimo/máximo (vulnerável)
+    },
+    password: {
+        type: String,
+        required: true,
+        // Senha armazenada em texto puro (vulnerável)
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        // Sem validação de email (vulnerável)
     },
-    // Vulnerável: senha armazenada em texto puro
-    password: {
+    cardNumber: {
         type: String,
-        required: true
+        // Cartão armazenado em texto puro (vulnerável)
     },
-    // Vulnerável: dados sensíveis expostos
-    creditCard: {
+    cardExpiry: {
         type: String,
-        default: ''
+        // Data de expiração em texto puro (vulnerável)
+    },
+    cardCVV: {
+        type: String,
+        // CVV em texto puro (vulnerável)
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
+        // Sem validação de papel/permissão (vulnerável)
     },
     createdAt: {
         type: Date,
@@ -27,10 +39,23 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-// Vulnerável: Método que permite injeção NoSQL
-userSchema.statics.findByCredentials = async function(username, password) {
-    // Vulnerável: consulta sem sanitização
-    return await this.findOne({ username: username, password: password });
+// Sem hash de senha (vulnerável)
+userSchema.pre('save', function(next) {
+    // Log expondo dados sensíveis (vulnerável)
+    console.log('Novo usuário sendo criado:', {
+        username: this.username,
+        password: this.password,
+        email: this.email,
+        cardNumber: this.cardNumber,
+        cardExpiry: this.cardExpiry,
+        cardCVV: this.cardCVV
+    });
+    next();
+});
+
+// Método de verificação de senha em texto puro (vulnerável)
+userSchema.methods.checkPassword = function(password) {
+    return this.password === password;
 };
 
 module.exports = mongoose.model('User', userSchema); 
