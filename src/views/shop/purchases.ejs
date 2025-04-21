@@ -1,0 +1,62 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Histórico de Compras</h2>
+        <div class="alert alert-warning">
+            <strong>⚠️ Aviso:</strong> Esta página é vulnerável a IDOR e expõe dados sensíveis.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <% if (purchases && purchases.length > 0) { %>
+        <% purchases.forEach(purchase => { %>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Vulnerável: Dados do jogo não sanitizados -->
+                        <h5 class="card-title"><%- purchase.game.title %></h5>
+                        <p class="card-text"><%- purchase.game.description %></p>
+                        
+                        <hr>
+                        
+                        <!-- Vulnerável: Expõe dados sensíveis -->
+                        <div class="purchase-details">
+                            <p><strong>Data da Compra:</strong> <%= new Date(purchase.purchaseDate).toLocaleString() %></p>
+                            <p><strong>Valor:</strong> R$ <%= purchase.price.toFixed(2) %></p>
+                            
+                            <!-- Vulnerável: Expõe dados do cartão -->
+                            <div class="payment-info">
+                                <h6>Dados do Pagamento:</h6>
+                                <p><strong>Cartão:</strong> <%= purchase.paymentDetails.cardNumber %></p>
+                                <p><strong>Validade:</strong> <%= purchase.paymentDetails.expiryDate %></p>
+                                <p><strong>CVV:</strong> <%= purchase.paymentDetails.cvv %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div class="col-12">
+            <div class="alert alert-info">
+                Você ainda não fez nenhuma compra.
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Vulnerabilidades desta página:</h5>
+                <ul>
+                    <li>IDOR - Tente acessar compras de outros usuários alterando o ID na URL</li>
+                    <li>Exposição de dados sensíveis do cartão</li>
+                    <li>XSS nos dados dos jogos</li>
+                    <li>Sem verificação de propriedade dos dados</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

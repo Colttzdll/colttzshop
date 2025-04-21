@@ -1,0 +1,110 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Catálogo de Jogos</h2>
+        <div class="alert alert-warning">
+            <strong>⚠️ Aviso:</strong> Esta página contém vulnerabilidades de XSS e CSRF.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <% games.forEach(game => { %>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card game-card h-100">
+                <!-- Vulnerável: URL da imagem não sanitizada -->
+                <img src="<%= game.imageUrl %>" class="card-img-top" alt="<%= game.title %>" 
+                     onerror="this.src='https://via.placeholder.com/300x200?text=Sem+Imagem'">
+                
+                <div class="card-body">
+                    <!-- Vulnerável: Título e descrição não sanitizados -->
+                    <h5 class="card-title"><%- game.title %></h5>
+                    <p class="card-text"><%- game.description %></p>
+                    <p class="card-text">
+                        <strong>Preço:</strong> R$ <%= game.price.toFixed(2) %>
+                    </p>
+
+                    <!-- Vulnerável: Reviews não sanitizadas -->
+                    <div class="reviews-section">
+                        <h6>Reviews (<%= game.userReviews.length %>)</h6>
+                        <div id="reviews-container-<%= game._id %>">
+                            <% game.userReviews.forEach(review => { %>
+                                <div class="review-card">
+                                    <!-- Vulnerável: XSS nos reviews -->
+                                    <h6><%- review.user %></h6>
+                                    <p><%- review.comment %></p>
+                                    <small>Avaliação: <%- review.rating %>/5</small>
+                                </div>
+                            <% }) %>
+                        </div>
+
+                        <% if (user) { %>
+                            <!-- Vulnerável: Formulário sem CSRF token -->
+                            <form onsubmit="event.preventDefault(); addReview('<%= game._id %>')">
+                                <div class="mb-3">
+                                    <label for="review-comment-<%= game._id %>" class="form-label">Seu comentário:</label>
+                                    <textarea class="form-control" id="review-comment-<%= game._id %>" rows="2"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="review-rating-<%= game._id %>" class="form-label">Avaliação:</label>
+                                    <select class="form-control" id="review-rating-<%= game._id %>">
+                                        <option value="1">1 - Péssimo</option>
+                                        <option value="2">2 - Ruim</option>
+                                        <option value="3">3 - Regular</option>
+                                        <option value="4">4 - Bom</option>
+                                        <option value="5">5 - Excelente</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-secondary">Adicionar Review</button>
+                            </form>
+                        <% } %>
+                    </div>
+
+                    <% if (user) { %>
+                        <hr>
+                        <!-- Vulnerável: Formulário de compra sem CSRF token -->
+                        <form onsubmit="event.preventDefault(); purchaseGame('<%= game._id %>')">
+                            <div class="mb-3">
+                                <label for="card-number" class="form-label">Número do Cartão</label>
+                                <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456">
+                            </div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <label for="expiry-date" class="form-label">Validade</label>
+                                    <input type="text" class="form-control" id="expiry-date" placeholder="MM/AA">
+                                </div>
+                                <div class="col-4">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123">
+                                </div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary">Comprar por R$ <%= game.price.toFixed(2) %></button>
+                            </div>
+                        </form>
+                    <% } else { %>
+                        <div class="d-grid mt-3">
+                            <a href="/auth/login" class="btn btn-primary">Faça login para comprar</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Vulnerabilidades desta página:</h5>
+                <ul>
+                    <li>XSS nos comentários (tente inserir <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>)</li>
+                    <li>XSS nos títulos e descrições dos jogos</li>
+                    <li>CSRF nas operações de compra</li>
+                    <li>Exposição de dados sensíveis do cartão</li>
+                    <li>Sem validação de entrada nos formulários</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

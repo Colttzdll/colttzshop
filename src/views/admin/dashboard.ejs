@@ -1,0 +1,172 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Painel Administrativo</h2>
+        <div class="alert alert-danger">
+            <strong>⚠️ Aviso:</strong> Esta página é extremamente vulnerável e expõe dados sensíveis.
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Usuários -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Usuários Cadastrados</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Senha</th>
+                                <th>Cartão de Crédito</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr>
+                                    <!-- Vulnerável: Expõe todos os dados sensíveis -->
+                                    <td><%- user._id %></td>
+                                    <td><%- user.username %></td>
+                                    <td><%- user.email %></td>
+                                    <td><%- user.password %></td>
+                                    <td><%- user.creditCard %></td>
+                                    <td><%= new Date(user.createdAt).toLocaleString() %></td>
+                                    <td>
+                                        <!-- Vulnerável: Sem CSRF token -->
+                                        <form action="/admin/users/delete/<%= user._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Jogos -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Jogos Cadastrados</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Descrição</th>
+                                <th>Preço</th>
+                                <th>Reviews</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% games.forEach(game => { %>
+                                <tr>
+                                    <!-- Vulnerável: Dados não sanitizados -->
+                                    <td><%- game._id %></td>
+                                    <td><%- game.title %></td>
+                                    <td><%- game.description %></td>
+                                    <td>R$ <%= game.price.toFixed(2) %></td>
+                                    <td><%= game.userReviews.length %> reviews</td>
+                                    <td><%= new Date(game.createdAt).toLocaleString() %></td>
+                                    <td>
+                                        <!-- Vulnerável: Sem CSRF token -->
+                                        <form action="/admin/games/delete/<%= game._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Compras -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Histórico de Compras</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuário</th>
+                                <th>Jogo</th>
+                                <th>Preço</th>
+                                <th>Cartão</th>
+                                <th>Validade</th>
+                                <th>CVV</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% purchases.forEach(purchase => { %>
+                                <tr>
+                                    <!-- Vulnerável: Expõe dados sensíveis de pagamento -->
+                                    <td><%- purchase._id %></td>
+                                    <td><%- purchase.user.username %></td>
+                                    <td><%- purchase.game.title %></td>
+                                    <td>R$ <%= purchase.price.toFixed(2) %></td>
+                                    <td><%- purchase.paymentDetails.cardNumber %></td>
+                                    <td><%- purchase.paymentDetails.expiryDate %></td>
+                                    <td><%- purchase.paymentDetails.cvv %></td>
+                                    <td><%= new Date(purchase.purchaseDate).toLocaleString() %></td>
+                                    <td>
+                                        <!-- Vulnerável: Sem CSRF token -->
+                                        <form action="/admin/purchases/delete/<%= purchase._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Vulnerabilidades desta página:</h5>
+                <ul>
+                    <li>Exposição de dados sensíveis (senhas, cartões, etc.)</li>
+                    <li>XSS em todos os campos não sanitizados</li>
+                    <li>CSRF nos formulários de deleção</li>
+                    <li>Autenticação admin fraca (apenas verifica username)</li>
+                    <li>Sem logs de ações administrativas</li>
+                    <li>Sem confirmação para ações destrutivas</li>
+                    <li>Sem paginação (vulnerável a DoS)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

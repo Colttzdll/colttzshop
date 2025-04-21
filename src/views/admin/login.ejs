@@ -1,0 +1,45 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Login Administrativo</h2>
+                
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <!-- Vulnerável: Formulário sem CSRF token -->
+                <form action="/admin/login" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome de usuário</label>
+                        <!-- Vulnerável: Input sem sanitização -->
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <!-- Vulnerável: Senha em texto puro -->
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger">Entrar como Admin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h5>⚠️ Vulnerabilidades nesta página:</h5>
+            <ul class="mb-0">
+                <li>Credenciais hardcoded (admin/admin)</li>
+                <li>Sem proteção contra força bruta</li>
+                <li>Sem proteção CSRF</li>
+                <li>Sem sanitização de entrada</li>
+                <li>Comparação de senha em texto puro</li>
+            </ul>
+        </div>
+    </div>
+</div> 

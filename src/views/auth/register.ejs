@@ -1,0 +1,64 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Criar Conta</h2>
+                
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                <% } %>
+                
+                <!-- Vulnerável: Formulário sem CSRF token -->
+                <form action="/auth/register" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome de usuário</label>
+                        <!-- Vulnerável: Input sem sanitização -->
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <!-- Vulnerável: Input sem validação adequada -->
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <!-- Vulnerável: Senha sem requisitos de complexidade -->
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <small class="text-muted">A senha será armazenada em texto puro (vulnerável)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="creditCard" class="form-label">Cartão de Crédito (opcional)</label>
+                        <!-- Vulnerável: Dados sensíveis sem proteção -->
+                        <input type="text" class="form-control" id="creditCard" name="creditCard" 
+                               placeholder="1234 5678 9012 3456">
+                        <small class="text-danger">⚠️ Não use cartão real! Dados serão expostos.</small>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Criar Conta</button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p>Já tem uma conta? <a href="/auth/login">Faça login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h5>⚠️ Vulnerabilidades nesta página:</h5>
+            <ul class="mb-0">
+                <li>Sem proteção CSRF</li>
+                <li>Dados sensíveis expostos</li>
+                <li>Senha em texto puro</li>
+                <li>Sem validação de entrada</li>
+                <li>Sem sanitização de dados</li>
+            </ul>
+        </div>
+    </div>
+</div> 
